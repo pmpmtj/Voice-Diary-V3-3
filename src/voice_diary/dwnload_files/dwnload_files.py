@@ -203,16 +203,17 @@ def authenticate_google_drive():
         logger.error(f"Authentication error: {str(e)}")
         raise
 
-def list_files_in_folder(service, folder_id, file_extensions=None):
+def list_files_in_folder(service, folder_id, file_extensions=None, sort_by='createdTime'):
     """List all files in a Google Drive folder with filtering by file extension.
     
     Args:
         service: Google Drive API service instance
         folder_id: ID of the folder to list files from
         file_extensions: Optional dict with 'include' list of file extensions
+        sort_by: Field to sort results by (default: 'createdTime')
         
     Returns:
-        list: List of file objects
+        list: List of file objects sorted by the specified field
     """
     if file_extensions is None:
         file_extensions = {"include": []}
@@ -223,7 +224,8 @@ def list_files_in_folder(service, folder_id, file_extensions=None):
         results = service.files().list(
             q=query,
             spaces='drive',
-            fields='files(id, name, mimeType)'
+            fields=f'files(id, name, mimeType, {sort_by})',
+            orderBy=f"{sort_by}"
         ).execute()
         
         files = results.get('files', [])
@@ -367,11 +369,20 @@ def delete_file(service, file_id, file_name=None):
 def process_folder(service, folder_id, folder_name, parent_path="", dry_run=False):
     """Process files in a Google Drive folder (non-recursively)."""
     try:
+        # Get sort settings from config
+        sort_by = CONFIG.get('sorting', {}).get('sort_by', 'createdTime')
+        sort_order = CONFIG.get('sorting', {}).get('sort_order', 'asc')
+        
+        # Prepare sort order parameter (asc or desc)
+        order_direction = 'asc' if sort_order.lower() == 'asc' else 'desc'
+        sort_param = f"{sort_by} {order_direction}"
+        
         # Only look for files (not folders) in the specified folder
         query = f"'{folder_id}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false"
         results = service.files().list(
             q=query,
-            fields="files(id, name, mimeType, size, modifiedTime, fileExtension)",
+            fields=f"files(id, name, mimeType, size, {sort_by}, fileExtension)",
+            orderBy=sort_param,
             pageSize=1000
         ).execute()
         items = results.get('files', [])
@@ -390,7 +401,7 @@ def process_folder(service, folder_id, folder_name, parent_path="", dry_run=Fals
                 'video_files': 0
             }
             
-        logger.info(f"Found {len(items)} files in folder: {folder_name}")
+        logger.info(f"Found {len(items)} files in folder: {folder_name}, sorted by {sort_by} {order_direction}")
         
         # Count metrics
         stats = {
@@ -422,8 +433,13 @@ def process_folder(service, folder_id, folder_name, parent_path="", dry_run=Fals
             item_id = item['id']
             item_name = item['name']
             mime_type = item.get('mimeType', '')
+            created_time = item.get(sort_by, '')
             
             stats['processed_files'] += 1
+            
+            # Log file with its creation date if available
+            if created_time:
+                logger.info(f"Processing file '{item_name}' ({sort_by}: {created_time})")
             
             # Check file extension and determine file type
             file_ext = os.path.splitext(item_name)[1].lower()

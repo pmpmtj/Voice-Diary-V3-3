@@ -5,9 +5,8 @@ OpenAI Whisper API Transcription
 This script transcribes audio files using OpenAI's API:
 - whisper-1 API endpoint 
 
-
-It processes audio files in the downloads directory, supporting both
-individual files and batch processing based on the configuration.
+It processes audio files in the downloads directory in chronological order,
+supporting both individual files and batch processing based on the configuration.
 """
 
 import os
@@ -26,6 +25,7 @@ import traceback
 import platform
 import subprocess
 import logging.handlers
+import re
 from openai import OpenAI
 
 
@@ -159,7 +159,7 @@ def load_config():
         sys.exit(1)
 
 def get_audio_files(directory):
-    """Get all audio files from the specified directory."""
+    """Get all audio files from the specified directory and sort them chronologically."""
     directory = Path(directory)
     
     if not directory.exists():
@@ -174,7 +174,38 @@ def get_audio_files(directory):
     for ext in audio_extensions:
         audio_files.extend(directory.glob(f"*{ext}"))
     
-    return audio_files
+    if not audio_files:
+        return []
+    
+    # Function to extract timestamp from filename if present
+    def get_timestamp_from_filename(filepath):
+        filename = filepath.name
+        # Try to extract timestamp in format YYYYMMDD_HHMMSS from filename
+        timestamp_match = re.search(r'(\d{8}_\d{6})', filename)
+        if timestamp_match:
+            try:
+                # If timestamp found in filename, use it
+                timestamp_str = timestamp_match.group(1)
+                return datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
+            except ValueError:
+                pass
+        
+        # Fall back to file creation time if no timestamp in filename
+        # or if timestamp couldn't be parsed
+        return datetime.fromtimestamp(os.path.getctime(filepath))
+    
+    # Sort files by timestamp
+    logger.info("Sorting audio files by creation time (chronological order)")
+    sorted_files = sorted(audio_files, key=get_timestamp_from_filename)
+    
+    # Log the sorted files
+    if sorted_files:
+        logger.info("Files will be processed in the following order:")
+        for i, file in enumerate(sorted_files, 1):
+            timestamp = get_timestamp_from_filename(file)
+            logger.info(f"{i}. {file.name} (Created: {timestamp.strftime('%Y-%m-%d %H:%M:%S')})")
+    
+    return sorted_files
 
 def transcribe_audio_file(client, file_path):
     """Transcribe a single audio file using OpenAI's Whisper API."""
@@ -264,14 +295,13 @@ def process_audio_files(client, audio_files, output_path, output_file):
     
     return False
 
-
 def run_transcribe():
     """Main function to run the transcription process."""
     try:
         # Load configuration
         config = load_config()
         
-        # Get downloads directory from Google Drive config first ########################
+        # Get downloads directory from Google Drive config first
         gdrive_downloads_dir = get_downloads_dir_from_gdrive_config()
         downloads_dir = Path(gdrive_downloads_dir)
         
@@ -284,7 +314,7 @@ def run_transcribe():
         # Get OpenAI client
         client = get_openai_client()
         
-        # Get audio files
+        # Get audio files in chronological order
         audio_files = get_audio_files(downloads_dir)
         
         # Process audio files
