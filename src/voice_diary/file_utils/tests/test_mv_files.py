@@ -11,12 +11,20 @@ import json
 import logging
 from pathlib import Path
 
-# Add parent directory to path to allow imports when run directly
-parent_dir = str(Path(__file__).resolve().parent.parent)
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# Handle both frozen (PyInstaller) and regular Python execution
+SCRIPT_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent
+parent_dir = SCRIPT_DIR.parent
 
-from mv_files import load_config, setup_logging, process_files, get_extensions_from_gdrive_config
+# Add parent directory to path to allow imports when run directly
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Try package import first, then fallback to relative import if running as standalone script
+try:
+    from voice_diary.file_utils.mv_files import load_config, setup_logging, process_files, get_extensions_from_gdrive_config
+except ImportError:
+    # Fallback to direct import when running as a standalone script
+    from mv_files import load_config, setup_logging, process_files, get_extensions_from_gdrive_config
 
 
 def create_test_files(source_dir: Path):
@@ -51,8 +59,8 @@ def create_test_files(source_dir: Path):
 def print_extensions_source():
     """Print information about where the extensions are loaded from."""
     # Find the expected paths
-    project_root = Path(__file__).resolve().parent.parent.parent
-    local_config_path = Path(__file__).resolve().parent.parent / "file_utils_config" / "file_utils_config.json"
+    project_root = SCRIPT_DIR.parent.parent
+    local_config_path = SCRIPT_DIR.parent / "file_utils_config" / "file_utils_config.json"
     gdrive_config_path = project_root / "dwnload_files" / "config_dwnload_files" / "config_dwnld_from_gdrive.json"
     
     print("\nExtension Sources:")
@@ -87,8 +95,7 @@ def run_test():
     print_extensions_source()
     
     # Get the path to the configuration file
-    script_dir = Path(__file__).parent.parent
-    config_path = script_dir / 'file_utils_config' / 'file_utils_config.json'
+    config_path = SCRIPT_DIR.parent / 'file_utils_config' / 'file_utils_config.json'
     
     try:
         # Load configuration
@@ -117,5 +124,6 @@ def run_test():
         return 1  # Failure
 
 
+# Allow running as a module or as a standalone script
 if __name__ == "__main__":
     sys.exit(run_test()) 

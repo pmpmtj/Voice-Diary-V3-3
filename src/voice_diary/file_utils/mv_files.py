@@ -7,12 +7,16 @@ target directories based on file extensions.
 """
 
 import os
+import sys
 import json
 import shutil
 import logging
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from typing import Dict, List, Tuple, Set, Optional, Union
+
+# Handle both frozen (PyInstaller) and regular Python execution
+SCRIPT_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent
 
 
 def load_config(config_path: Union[str, Path]) -> Dict:
@@ -48,7 +52,7 @@ def get_extensions_from_gdrive_config() -> Dict[str, List[str]]:
     
     try:
         # Find the main config file relative to this module
-        project_root = Path(__file__).resolve().parent.parent
+        project_root = SCRIPT_DIR.parent
         gdrive_config_path = project_root / "dwnload_files" / "config_dwnload_files" / "config_dwnld_from_gdrive.json"
         
         if not gdrive_config_path.exists():
@@ -121,7 +125,7 @@ def setup_logging(config: Dict) -> logging.Logger:
     backup_count = log_config.get('backup_count', 3)
     
     # Create logs directory if it doesn't exist
-    log_dir = Path(__file__).parent / 'logs'
+    log_dir = SCRIPT_DIR / 'logs'
     log_dir.mkdir(exist_ok=True)
     
     log_path = log_dir / log_file
@@ -299,8 +303,7 @@ def main():
     Main function to execute when the script is run directly.
     """
     # Determine the config file path relative to this script
-    script_dir = Path(__file__).parent
-    config_path = script_dir / 'file_utils_config' / 'file_utils_config.json'
+    config_path = SCRIPT_DIR / 'file_utils_config' / 'file_utils_config.json'
     
     try:
         # Load configuration

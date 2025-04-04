@@ -27,6 +27,7 @@ import subprocess
 import logging.handlers
 import re
 from openai import OpenAI
+from voice_diary.db_utils.db_manager import save_transcription as db_save_transcription
 
 
 # Get the package directory path
@@ -298,6 +299,16 @@ def process_audio_files(client, audio_files, output_path, output_file):
         transcription = transcribe_audio_file(client, file_path)
         
         if transcription:
+            # Save transcription to database
+            duration = calculate_duration(file_path)
+            db_save_transcription(
+                content=transcription,
+                filename=file_path.name, 
+                audio_path=str(file_path),
+                duration_seconds=duration,
+                metadata={"transcribed_at": datetime.now().isoformat()}
+            )
+            
             # Add file name and timestamp to the transcription
             file_name = file_path.name
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
