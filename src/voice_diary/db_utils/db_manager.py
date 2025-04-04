@@ -112,7 +112,7 @@ def save_transcription(content, filename=None, audio_path=None, model_type=None,
         cur.execute("""
         INSERT INTO transcriptions 
         (content, filename, audio_path, duration_seconds, metadata)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s)
         RETURNING id
         """, (content, filename, audio_path, duration_seconds, metadata_json))
         
