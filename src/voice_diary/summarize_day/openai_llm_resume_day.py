@@ -1,3 +1,10 @@
+
+
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+
+
 #!/usr/bin/env python3
 """
 Entries Summarizer
@@ -290,3 +297,9 @@ if __name__ == "__main__":
     else:
         # Use default files from config
         summarize_journal_entries()
+
+
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+########## THIS SCRIPT IS A TEMPLATE AND IS USED BY SUMMARIZE_DAY.PY ##########
+

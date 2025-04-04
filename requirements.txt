@@ -5,5 +5,5 @@ python-dotenv
 psycopg2-binary
 pytest
 pytest-mock
-openai
+openai>=1.14.0
 pyyaml

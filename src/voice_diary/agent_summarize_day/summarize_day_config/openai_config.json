@@ -1,0 +1,27 @@
+{
+  "openai_config": {
+    "api_endpoint": "https://api.openai.com/v1/chat/completions",
+    "api_key": "",
+    "model": "gpt-4o",
+    "temperature": 0.2,
+    "max_tokens": 1500,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "save_usage_stats": true,
+    "usage_log_file": "openai_usage.log",
+    "assistant_id": "asst_AXo9m2JQRN8sKdxDbgXGuyCz",
+    "thread_id": "thread_K6CzHDmUGDhSMTO9VHWZLZ3f",
+    "thread_created_at": "2025-04-04T18:30:26.962075",
+    "thread_retention_days": 30
+  },
+  "logging": {
+    "log_file": "openai_llm_resume_day.log",
+    "max_size_bytes": 1048576,
+    "backup_count": 3,
+    "log_level": "INFO",
+    "openai_usage_log_file": "openai_usage.log",
+    "openai_usage_max_size_bytes": 1048576,
+    "openai_usage_backup_count": 3
+  }
+}
