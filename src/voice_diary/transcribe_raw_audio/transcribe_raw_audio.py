@@ -94,6 +94,24 @@ def get_downloads_dir_from_gdrive_config():
         logger.warning(f"Error loading Google Drive config: {str(e)}")
         return None
 
+def get_audio_extensions_from_gdrive_config():
+    """Get supported audio extensions from Google Drive download config."""
+    try:
+        project_root = Path(__file__).resolve().parent.parent
+        gdrive_config_path = project_root / "dwnload_files" / "config_dwnload_files" / "config_dwnld_from_gdrive.json"
+        
+        if not gdrive_config_path.exists():
+            logger.warning(f"Google Drive config file not found at {gdrive_config_path}")
+            return None
+            
+        with open(gdrive_config_path, 'r') as f:
+            gdrive_config = json.load(f)
+            
+        return gdrive_config.get("audio_file_types", {}).get("include", [])
+    except Exception as e:
+        logger.warning(f"Error loading audio extensions from Google Drive config: {str(e)}")
+        return None
+
 def get_openai_client():
     """Get an instance of the OpenAI client."""
     try:
@@ -166,8 +184,8 @@ def get_audio_files(directory):
         logger.error(f"Directory {directory} does not exist")
         return []
         
-    # Common audio file extensions
-    audio_extensions = ['.mp3', '.wav', '.m4a', '.flac', '.aac', '.ogg']
+    # Get audio extensions from Google Drive config
+    audio_extensions = get_audio_extensions_from_gdrive_config()
     
     # Get all files with audio extensions
     audio_files = []
