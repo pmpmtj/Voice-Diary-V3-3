@@ -57,7 +57,7 @@
       "delete_after_download": true
     },
     "downloads_path": {
-      "downloads_dir": "C:/Users/pmpmt/Scripts_Cursor/250402-Voice-Diary-V3-2/Voice-Diary-V3-3/src/voice_diary/dwnload_files/downloads"
+      "downloads_dir": "C:/Users/pmpmt/Scripts_Cursor/250402-Voice-Diary-V3-3/Voice-Diary-V3-3/src/voice_diary/dwnload_files/downloads"
     },
     "logging": {
         "level": "INFO",

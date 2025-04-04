@@ -29,7 +29,6 @@ import logging.handlers
 from openai import OpenAI
 
 
-
 # Get the package directory path
 SCRIPT_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).resolve().parent
 LOGS_DIR = SCRIPT_DIR / "logs"
@@ -75,6 +74,25 @@ def setup_logging(logs_dir, log_filename="transcribe_raw_audio.log", to_file=Tru
 
 # Initialize logger after function definition
 logger = setup_logging(LOGS_DIR)
+
+# Get downloads directory from Google Drive config
+def get_downloads_dir_from_gdrive_config():
+    """Get downloads directory from Google Drive download config."""
+    try:
+        project_root = Path(__file__).resolve().parent.parent
+        gdrive_config_path = project_root / "dwnload_files" / "config_dwnload_files" / "config_dwnld_from_gdrive.json"
+        
+        if not gdrive_config_path.exists():
+            logger.warning(f"Google Drive config file not found at {gdrive_config_path}")
+            return None
+            
+        with open(gdrive_config_path, 'r') as f:
+            gdrive_config = json.load(f)
+            
+        return gdrive_config.get("downloads_path", {}).get("downloads_dir")
+    except Exception as e:
+        logger.warning(f"Error loading Google Drive config: {str(e)}")
+        return None
 
 def get_openai_client():
     """Get an instance of the OpenAI client."""
@@ -246,14 +264,16 @@ def process_audio_files(client, audio_files, output_path, output_file):
     
     return False
 
+
 def run_transcribe():
     """Main function to run the transcription process."""
     try:
         # Load configuration
         config = load_config()
         
-        # Get downloads directory path
-        downloads_dir = Path(SCRIPT_DIR) / config.get("downloads_dir", "downloads")
+        # Get downloads directory from Google Drive config first ########################
+        gdrive_downloads_dir = get_downloads_dir_from_gdrive_config()
+        downloads_dir = Path(gdrive_downloads_dir)
         
         # Get output file name
         output_file = config.get("output_file", "transcription.txt")
