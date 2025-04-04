@@ -1,0 +1,25 @@
+# Coverage reports
+.coverage
+tests/coverage/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE files
+.idea/
+.vscode/ 
+src/voice_diary/dwnload_files/gdrive_credentials/

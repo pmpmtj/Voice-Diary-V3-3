@@ -1,0 +1,12 @@
+{ 
+  "logging": {
+  "level": "INFO",
+  "format": "%(asctime)s - %(levelname)s - %(message)s",
+  "log_file": "db_utils.log",
+  "max_size_bytes": 1048576,
+  "backup_count": 3
+},
+  "downloads_dir": "C:/Users/pmpmt/Scripts_Cursor/250402-Voice-Diary-V3-2/Voice-Diary-V3-2/src/voice_diary/dwnload_files/downloads",
+  "transcriptions_dir": "C:/Users/pmpmt/Scripts_Cursor/250402-Voice-Diary-V3-2/Voice-Diary-V3-2/src/voice_diary/transcribe_raw_audio/transcriptions",
+  "output_file": "transcription.txt"
+}
